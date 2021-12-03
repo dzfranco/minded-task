@@ -16,7 +16,7 @@ import {
 import { ApiHeader, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { CreateResetPassDto } from "../dto/createPassResetToken.dto";
 import { ResetPassDto } from "../dto/resetPass.dto";
-import { UserCredentialsDto } from "../dto/userSignUp.dto";
+import { UserCredentialsDto } from "../dto/userCredentials.dto";
 import { LoginGuard } from "../guards/login.guard";
 import { ResetPassTokenGuard } from "../guards/reset-pass-token.guard";
 import { AuthService } from "../services/auth.service";

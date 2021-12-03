@@ -11,15 +11,6 @@ export class UserCredentialsDto {
   })
   @IsEmail()
   email: string;
-
-  @ApiProperty({
-    example: "Password!",
-    description: "User password",
-  })
-  @IsNotEmpty()
-  @Matches(passwordRegex)
-  password: string;
-
   @ApiProperty({
     example: "1990-01-01",
     description: "User DOB, in `YYYY-MM-DD` format",

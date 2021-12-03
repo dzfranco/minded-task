@@ -24,5 +24,6 @@ module.exports = {
     "@typescript-eslint/no-explicit-any": 0,
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/ban-types": 0,
+    "@typescript-eslint/no-unused-vars": ["error", { "ignoreRestSiblings": true }]
   },
 };

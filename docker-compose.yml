@@ -13,7 +13,7 @@ services:
       - mysql
       - redis
     ports:
-      - ${PORT}:${PORT}
+      - '3000:3000'
     volumes:
       - ./:/usr/src/app
       - ./.data/logs:/var/log

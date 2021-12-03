@@ -4,6 +4,8 @@ import { loggerConfig } from "@/Config/logger";
 import { HealthModule } from "@/health/health.module";
 import { Module, NestModule } from "@nestjs/common";
 import { RedisModule } from "nestjs-redis";
+import { UserModule } from '@/User/user.module';
+import { AuthModule } from "@/Auth/auth.module";
 
 const appImports = [
   dbConfig,
@@ -17,6 +19,8 @@ const appImports = [
       keepAlive: config.redis.ttl,
     }),
   }),
+  AuthModule,
+  UserModule
 ];
 
 @Module({

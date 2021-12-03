@@ -5,7 +5,7 @@ import { Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as bcrypt from "bcryptjs";
-import { AuthService } from "./auth.service";
+import { AuthService } from "@/Auth/services/auth.service";
 
 describe("Auth Service", () => {
   let testingModule: TestingModule;

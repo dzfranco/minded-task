@@ -1,27 +1,41 @@
-import { UserCredentialsDto } from "@/Auth/dto/userSignUp.dto";
-import { Injectable, Logger } from "@nestjs/common";
+import { UserCredentialsDto } from "@/Auth/dto/userCredentials.dto";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { AuthUser } from "../interfaces/authUser.interface";
+import { IUserService } from "@/User/public/interfaces";
+import { UserEntity } from "@/User/public/entity/user.entity";
+import { UserLoginDto } from "@/Auth/dto/userLogin.dto";
+import { UserErrorMessages } from "@/Auth/error";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly logger: Logger
-  ) {}
+    private readonly logger: Logger,
+    private readonly userService: IUserService
+  ) {
+  }
 
-  async validateHash(plainPass: string, hashedPass: string) {
-    return bcrypt.compare(plainPass, hashedPass);
+  /**
+   * Validates a user by comparing a hash vs a password
+   * @param {string} plainPass - The password as given by the user
+   * @param {string} hashedPass - The hashed password as stored in the DB
+   * @return {Promise<void>}
+   * @throws {NotFoundException}
+   */
+  private async validateHash(plainPass: string, hashedPass: string): Promise<void> {
+    const isValid: boolean = await bcrypt.compare(plainPass, hashedPass);
+    if (!isValid) {
+      throw new NotFoundException(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD);
+    }
   }
 
   async validateEmail(email: string) {
     return true;
   }
 
-  /**
-   * Validates a user by comparing a hash vs a password
-   */
+
   async validateCredentials(
     userCredentialsDto: UserCredentialsDto
   ): Promise<AuthUser | void> {
@@ -38,11 +52,21 @@ export class AuthService {
   }
 
   /**
-   * Returns user information
+   * @description Logs the user and returns the information
+   * @param {UserLoginDto} payload - Information as given by the user, by no means should
+   * it be considered valid
+   * @returns {Promise<UserCredentialsDto>}
    */
-  async login(payload: AuthUser) {
-    // TODO: missing implementation
+  async login(payload: UserLoginDto): Promise<UserCredentialsDto> {
+    const user: UserEntity = await this.userService.getUserByEmail(payload.email);
+    if (!user) {
+      throw new NotFoundException(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD)
+    }
+    await this.validateHash(payload.password, user.password);
+    const {password, ...cleanUser} = user
+    return cleanUser
   }
+
 
   async signUp(userDto: UserCredentialsDto) {
     // TODO: missing implementation

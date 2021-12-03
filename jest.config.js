@@ -10,5 +10,5 @@ module.exports = {
     "@/libs/(.*)": "<rootDir>/libs/$1",
     "@/(.*)": "<rootDir>/src/$1",
   },
-  setupFiles: ["./test/jest-setup-file.ts"],
+  setupFiles: ["./test/setup.ts"],
 };
