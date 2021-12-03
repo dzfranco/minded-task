@@ -5,6 +5,8 @@ import {
   ForbiddenException,
   Get,
   Headers,
+  HttpCode,
+  HttpStatus,
   NotFoundException,
   Patch,
   Post,
@@ -24,7 +26,8 @@ import { AuthService } from "../services/auth.service";
 @ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {
+  }
 
   /**
    * Endpoint behind a guard that is synchronized with a passport local
@@ -37,6 +40,7 @@ export class AuthController {
    */
   @UseGuards(LoginGuard)
   @Post("login")
+  @HttpCode(HttpStatus.OK)
   public async login(@Body() userCredentialsDto: UserLoginDto, @Req() request) {
     return this.authService.login(request.user);
   }
@@ -92,7 +96,7 @@ export class AuthController {
     );
 
     if (validToken) {
-      return { validToken: true };
+      return {validToken: true};
     }
 
     throw new ForbiddenException();

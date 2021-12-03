@@ -1,8 +1,7 @@
-import { SequelizeModule } from "@nestjs/sequelize";
 import { config } from "./environment";
 import { SequelizeModuleOptions } from "@nestjs/sequelize/dist/interfaces/sequelize-options.interface";
 
-const dbOptions: { [env: string]: SequelizeModuleOptions } = {
+export const dbOptions: { [env: string]: SequelizeModuleOptions } = {
   dev: {
     dialect: "mysql",
     host: config.db.writeHost,
@@ -86,8 +85,3 @@ const dbOptions: { [env: string]: SequelizeModuleOptions } = {
 if (config.isProd && dbOptions.production.sync.force === true) {
   throw new Error("Forced sync is disabled in production");
 }
-
-/**
- * DB config object
- */
-export const dbConfig = SequelizeModule.forRoot(dbOptions[config.env]);

@@ -1,21 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
 import { User } from "@/User/model/user.model";
-import { IUserRepository } from "@/User/repo/interface/iuser.repository";
-
+import { Repository, Sequelize } from "sequelize-typescript";
 
 @Injectable()
-export class UserRepository implements IUserRepository {
-  constructor(@InjectModel(User)
-              private readonly userModel: typeof User,) {
+export class UserRepository {
+  private readonly userRepo: Repository<User>
+
+  constructor(
+    private sequelize: Sequelize
+  ) {
+    this.userRepo = this.sequelize.getRepository(User)
   }
 
-  getByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({
-      where: {
-        email
-      }
-    })
+  async getById(id: string): Promise<User | null> {
+    return this.userRepo.findOne({where: {id}})
+  }
+
+  async getByEmail(email: string): Promise<User | null> {
+    return this.userRepo.findOne({where: {email}})
   }
 
 

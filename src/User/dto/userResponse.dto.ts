@@ -4,21 +4,13 @@ import { IsEmail, IsNotEmpty, IsOptional, Matches } from "class-validator";
 const passwordRegex =
   /^(?=.*?[A-Z])(?=.*?[#¿?¡!@$%^&/()=+{}[\]:;."'`,*\-_<>¬]).{8,}$/;
 
-export class UserCredentialsDto {
+export class UserResponseDto {
   @ApiProperty({
     example: "some@email.com",
     description: "User email",
   })
   @IsEmail()
   email: string;
-
-  @ApiProperty({
-    example: "Password!",
-    description: "User password",
-  })
-  @IsNotEmpty()
-  @Matches(passwordRegex)
-  password: string;
 
   @ApiProperty({
     example: "1990-01-01",

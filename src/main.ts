@@ -1,10 +1,12 @@
-import "dotenv/config.js";
-import {AppModule} from "@/app.module";
-import {setupApplication} from "@/app.setup";
-import {config} from "@/Config/environment";
-import {swaggerOptions} from "@/Config/swagger";
-import {NestFactory} from "@nestjs/core";
-import {SwaggerModule} from "@nestjs/swagger";
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+import { AppModule } from "@/app.module";
+import { setupApplication } from "@/app.setup";
+import { config } from "@/Config/environment";
+import { swaggerOptions } from "@/Config/swagger";
+import { NestFactory } from "@nestjs/core";
+import { SwaggerModule } from "@nestjs/swagger";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

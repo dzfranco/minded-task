@@ -1,5 +1,5 @@
 import { UserCredentialsDto } from "@/Auth/dto/userCredentials.dto";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable, Logger, NotFoundException, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcryptjs";
 import { AuthUser } from "../interfaces/authUser.interface";
@@ -7,13 +7,15 @@ import { IUserService } from "@/User/public/interfaces";
 import { UserEntity } from "@/User/public/entity/user.entity";
 import { UserLoginDto } from "@/Auth/dto/userLogin.dto";
 import { UserErrorMessages } from "@/Auth/error";
+import { USER_IDENTIFIERS } from "@/User/public/constants";
+import { UserTokenDTO } from "@/Auth/dto/token.dto";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly logger: Logger,
-    private readonly userService: IUserService
+    @Inject(USER_IDENTIFIERS.UserService) private readonly userService: IUserService
   ) {
   }
 
@@ -27,7 +29,7 @@ export class AuthService {
   private async validateHash(plainPass: string, hashedPass: string): Promise<void> {
     const isValid: boolean = await bcrypt.compare(plainPass, hashedPass);
     if (!isValid) {
-      throw new NotFoundException(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD);
+      throw new UnauthorizedException(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD);
     }
   }
 
@@ -35,11 +37,26 @@ export class AuthService {
     return true;
   }
 
-
+  /**
+   * @description This method is used by the local auth guard to check if the user
+   * exists or not
+   * @param payload
+   */
   async validateCredentials(
-    userCredentialsDto: UserCredentialsDto
+    payload: UserLoginDto
   ): Promise<AuthUser | void> {
-    // TODO: missing implementation
+    try {
+      const user: UserEntity = await this.userService.getUserByEmail(payload.email);
+      if (!user) {
+        throw new UnauthorizedException(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD)
+      }
+      await this.validateHash(payload.password, user.password);
+      const {password, ...cleanUser} = user
+      return cleanUser
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
   }
 
   async verifyPassResetToken(...args): Promise<boolean> {
@@ -52,19 +69,12 @@ export class AuthService {
   }
 
   /**
-   * @description Logs the user and returns the information
-   * @param {UserLoginDto} payload - Information as given by the user, by no means should
-   * it be considered valid
+   * @description Logs the user and returns the an access token
+   * @param {UserCredentialsDto} payload - Information processed by the local guard
    * @returns {Promise<UserCredentialsDto>}
    */
-  async login(payload: UserLoginDto): Promise<UserCredentialsDto> {
-    const user: UserEntity = await this.userService.getUserByEmail(payload.email);
-    if (!user) {
-      throw new NotFoundException(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD)
-    }
-    await this.validateHash(payload.password, user.password);
-    const {password, ...cleanUser} = user
-    return cleanUser
+  async login(payload: UserCredentialsDto): Promise<UserTokenDTO> {
+    return this.signJwtToken(payload)
   }
 
 

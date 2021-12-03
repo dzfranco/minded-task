@@ -1,5 +1,5 @@
 import { AuthService } from "@/Auth/services/auth.service";
-import { Logger, NotFoundException } from "@nestjs/common";
+import { Logger, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { UserService } from "@/User/service/user.service";
 import { jest } from "@jest/globals";
@@ -22,12 +22,12 @@ describe('Auth Service', function () {
     jest.resetAllMocks();
   })
 
-  describe('Login', () => {
+  describe('Validate user credentials', () => {
     it('should login a user with the proper credentials', async () => {
       const user: IUser = UserFactory.build();
       jest.spyOn(userService, 'getUserByEmail').mockResolvedValue(user);
       const loginPayload: UserLoginDto = {email: user.email, password: USER_DEFAULT_PASSWORD};
-      const result = await sut.login(loginPayload);
+      const result = await sut.validateCredentials(loginPayload);
       const {password, ...expectedUser} = user;
       expect(result).toEqual(expectedUser)
     });
@@ -37,14 +37,25 @@ describe('Auth Service', function () {
       jest.spyOn(userService, 'getUserByEmail').mockResolvedValue(user);
       const loginPayload: UserLoginDto = {email: user.email, password: 'invalidPassword'};
       try {
-        await sut.login(loginPayload)
+        await sut.validateCredentials(loginPayload)
         fail('It should have thrown an error');
       } catch (error) {
         expect(error.message).toEqual(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD);
-        expect(error).toBeInstanceOf(NotFoundException);
+        expect(error).toBeInstanceOf(UnauthorizedException);
+      }
+    });
+
+    it('should throw an error when providing a wrong username', async () => {
+      const user: IUser = UserFactory.build();
+      jest.spyOn(userService, 'getUserByEmail').mockResolvedValue(null);
+      const loginPayload: UserLoginDto = {email: user.email, password: USER_DEFAULT_PASSWORD};
+      try {
+        await sut.validateCredentials(loginPayload)
+        fail('It should have thrown an error');
+      } catch (error) {
+        expect(error.message).toEqual(UserErrorMessages.INVALID_USERNAME_OR_PASSWORD);
+        expect(error).toBeInstanceOf(UnauthorizedException);
       }
     });
   })
-
-
 });

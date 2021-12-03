@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  redis:
+    container_name: redis.services.minded
+    image: redis:alpine
+    restart: always
+    command: redis-server --requirepass root
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./.data/redis-data:/var/lib/redis
+
+  mysql:
+    container_name: mysql.services.minded
+    image: mysql:5.7
+    restart: always
+    volumes:
+      - ./.data/mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: minded_local
+    ports:
+      - 3306:3306

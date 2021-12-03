@@ -1,1 +1,3 @@
-export const USER_SERVICE_IDENTIFIER = Symbol.for('UserService');
+export const USER_IDENTIFIERS = {
+  UserService: Symbol.for('UserService')
+};
